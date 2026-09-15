@@ -1,0 +1,13 @@
+---
+description: Bari Vara backend conventions — read skills.md before editing
+alwaysApply: true
+---
+
+# Bari Vara backend context
+
+Before scaffolding or editing code in this repository:
+
+1. Read and follow [`skills.md`](../../skills.md) at the backend root.
+2. For agent skill entry, use `.cursor/skills/bari-vara/`.
+3. Mirror existing files under `src/` — do not invent new layouts.
+4. Zod/types live in `src/shared` (`#shared`). API modules use routes → controller → service → serializer. Keep schema contracts aligned with the frontend repo.
