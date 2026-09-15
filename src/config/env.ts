@@ -1,5 +1,11 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
 import { z } from 'zod';
+
+/**
+ * Local: `.env.development` (gitignored). Production (Render) injects
+ * process.env — dotenv does not override existing keys, and a missing file is fine.
+ */
+dotenv.config({ path: '.env.development' });
 
 /**
  * Integrations are optional in development and test so the API can boot from a

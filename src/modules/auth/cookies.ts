@@ -3,6 +3,7 @@ import type { CookieOptions, Response } from 'express';
 
 import {
   accessTokenTtlSeconds,
+  corsOrigins,
   env,
   isProduction,
   refreshTokenTtlSeconds,
@@ -13,6 +14,15 @@ export {
   REFRESH_TOKEN_COOKIE as REFRESH_COOKIE,
 };
 
+/** Local http://localhost — secure cookies would be dropped by the browser. */
+const isLocalHttpOrigin = corsOrigins.every(
+  (origin) =>
+    origin.startsWith('http://localhost') ||
+    origin.startsWith('http://127.0.0.1'),
+);
+
+const useCrossSiteSecureCookies = isProduction && !isLocalHttpOrigin;
+
 /**
  * The web app runs on a different origin than the API in production, so cookies
  * must be sameSite=none, which browsers only accept alongside secure. Locally
@@ -20,8 +30,8 @@ export {
  */
 const baseCookieOptions: CookieOptions = {
   httpOnly: true,
-  secure: isProduction,
-  sameSite: isProduction ? 'none' : 'lax',
+  secure: useCrossSiteSecureCookies,
+  sameSite: useCrossSiteSecureCookies ? 'none' : 'lax',
   path: '/',
   ...(env.COOKIE_DOMAIN ? { domain: env.COOKIE_DOMAIN } : {}),
 };

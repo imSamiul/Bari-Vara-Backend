@@ -35,7 +35,7 @@ Password for all: `Password123`
 1. **Read before write** — open 1–2 similar existing modules; copy naming and nesting.
 2. **Schemas** — validate with `#shared` zod + `validate()` middleware, not ad-hoc checks in controllers.
 3. **Surgical diffs** — only touch what the task needs; no drive-by refactors.
-4. **No secrets** in commits; use `.env.example` patterns.
+4. **No secrets** in commits; copy `.env.example` → `.env.development` (gitignored). Live secrets live on Render/Vercel.
 5. Respond to the user in **Bangla + English** when chatting (code/comments stay English).
 
 ---
@@ -119,9 +119,9 @@ Vitest + Supertest; `src/test/helpers.ts` for users/flats/sign-in.
 ## Run / deploy
 
 ```bash
-cp .env.example .env
 pnpm install
 pnpm docker:up   # Redis only — point MONGODB_URI at Atlas or a local mongod
+cp .env.example .env.development
 pnpm seed
 pnpm dev
 ```

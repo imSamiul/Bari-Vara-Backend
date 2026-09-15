@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Redis } from 'ioredis';
 
 import { env } from './env.js';
@@ -7,8 +8,9 @@ export const redis = new Redis(env.REDIS_URL, {
   lazyConnect: true,
 });
 
-redis.on('error', () => {
+redis.on('error', (error) => {
   // Avoid unhandled 'error' events crashing the process.
+  console.error('Redis error', error);
 });
 
 /**
