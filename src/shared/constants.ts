@@ -119,4 +119,7 @@ export const ERROR_CODES = {
   invalidOtp: 'INVALID_OTP',
   otpAttemptsExceeded: 'OTP_ATTEMPTS_EXCEEDED',
   refreshTokenReused: 'REFRESH_TOKEN_REUSED',
+  googleTokenInvalid: 'GOOGLE_TOKEN_INVALID',
+  googleEmailUnverified: 'GOOGLE_EMAIL_UNVERIFIED',
+  googleNotConfigured: 'GOOGLE_NOT_CONFIGURED',
 } as const;

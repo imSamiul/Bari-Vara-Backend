@@ -1,5 +1,6 @@
 import type {
   EmailOnlyInput,
+  GoogleLoginInput,
   LoginInput,
   RegisterInput,
   ResetPasswordInput,
@@ -85,6 +86,14 @@ export const login: RequestHandler<never, unknown, LoginInput> = async (
   setAuthCookies(res, tokens);
   sendSuccess(res, 'Signed in', toPublicUser(user));
 };
+
+export const googleLogin: RequestHandler<never, unknown, GoogleLoginInput> =
+  async (req, res) => {
+    const { user, tokens } = await authService.loginWithGoogle(req.body);
+
+    setAuthCookies(res, tokens);
+    sendSuccess(res, 'Signed in with Google', toPublicUser(user));
+  };
 
 export const refresh: RequestHandler = async (req, res) => {
   const refreshToken = req.cookies?.[REFRESH_COOKIE];

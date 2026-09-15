@@ -5,13 +5,12 @@ import type {
 } from '#shared';
 import type { QueryFilter } from 'mongoose';
 
-import { Booking, Flat } from '../../models/index.js';
+import { Booking, Flat, User } from '../../models/index.js';
 import type { BookingDocument } from '../../models/Booking.js';
 import type { FlatDocument } from '../../models/Flat.js';
 import type { UserDocument } from '../../models/User.js';
 import { ApiError } from '../../utils/ApiError.js';
-import { invalidate } from '../../utils/cache.js';
-import { FLAT_LIST_CACHE, type Actor } from '../flats/flat.service.js';
+import type { Actor } from '../flats/flat.service.js';
 
 interface BookingRelations {
   flat: FlatDocument;
@@ -31,9 +30,13 @@ export async function createBooking(
   tenantId: string,
   input: CreateBookingInput,
 ) {
-  const flat = await Flat.findById(input.flatId);
+  const [flat, tenant] = await Promise.all([
+    Flat.findById(input.flatId),
+    User.findById(tenantId),
+  ]);
 
   if (!flat) throw ApiError.notFound('That listing no longer exists');
+  if (!tenant) throw ApiError.unauthorized('Sign in to request a visit');
 
   if (String(flat.owner) === tenantId) {
     throw ApiError.forbidden(
@@ -42,9 +45,17 @@ export async function createBooking(
     );
   }
 
+  // Owners need a reachable visitor — phone + address are required before NID.
+  if (!tenant.phone || !tenant.address) {
+    throw ApiError.forbidden(
+      'Add your phone number and address on your profile before requesting a visit',
+      'PROFILE_INCOMPLETE',
+    );
+  }
+
   if (flat.status !== 'available') {
     throw ApiError.conflict(
-      'That listing has already been taken',
+      'That listing is not available for visits right now',
       'FLAT_NOT_AVAILABLE',
     );
   }
@@ -57,14 +68,14 @@ export async function createBooking(
 
   if (existing) {
     throw ApiError.conflict(
-      'You already have a live request for this listing',
+      'You already have a live visit request for this listing',
       'BOOKING_ALREADY_EXISTS',
     );
   }
 
   const booking = await Booking.create({
     flat: flat._id,
-    tenant: tenantId,
+    tenant: tenant._id,
     owner: flat.owner,
     nid: input.nid,
     visitDate: new Date(input.visitDate),
@@ -98,8 +109,8 @@ export async function listBookings(
 }
 
 /**
- * The only owner-side transition: pending becomes approved or rejected, never
- * anything else, and approving takes the flat off the market.
+ * Owner decides a visit request. Approving schedules the visit only — it does
+ * not take the listing off the market. Owners mark a flat as rented separately.
  */
 export async function decideBooking(
   bookingId: string,
@@ -125,12 +136,6 @@ export async function decideBooking(
   booking.decidedAt = new Date();
   if (input.ownerNote) booking.ownerNote = input.ownerNote;
   await booking.save();
-
-  // An approval takes the flat off the market, so browse results are now stale.
-  if (input.status === 'approved') {
-    await Flat.updateOne({ _id: booking.flat }, { status: 'booked' });
-    await invalidate(FLAT_LIST_CACHE);
-  }
 
   return booking.populate<BookingRelations>(RELATIONS);
 }

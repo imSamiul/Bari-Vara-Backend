@@ -1,7 +1,6 @@
 import { createHash } from 'node:crypto';
 
 import { env } from '../config/env.js';
-import { logger } from '../config/logger.js';
 import { redis } from '../config/redis.js';
 
 const versionKey = (namespace: string) => `cache:${namespace}:version`;
@@ -38,9 +37,8 @@ export async function cached<T>(
     const hit = await redis.get(key);
 
     if (hit) return JSON.parse(hit) as T;
-  } catch (error) {
+  } catch {
     key = null;
-    logger.warn({ err: error, namespace }, 'Cache read failed');
   }
 
   const value = await loader();
@@ -48,8 +46,8 @@ export async function cached<T>(
   if (key) {
     try {
       await redis.set(key, JSON.stringify(value), 'EX', ttlSeconds);
-    } catch (error) {
-      logger.warn({ err: error, namespace }, 'Cache write failed');
+    } catch {
+      // Cache writes are best-effort.
     }
   }
 
@@ -60,7 +58,7 @@ export async function cached<T>(
 export async function invalidate(namespace: string) {
   try {
     await redis.incr(versionKey(namespace));
-  } catch (error) {
-    logger.warn({ err: error, namespace }, 'Cache invalidation failed');
+  } catch {
+    // Cache invalidation is best-effort.
   }
 }

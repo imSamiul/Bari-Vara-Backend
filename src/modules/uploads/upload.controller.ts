@@ -25,3 +25,11 @@ export const uploadMany: RequestHandler = async (req, res) => {
 
   sendSuccess(res, `${images.length} images uploaded`, images, 201);
 };
+
+export const destroyMany: RequestHandler = async (req, res) => {
+  const { publicIds } = req.body as { publicIds: string[] };
+
+  await uploadService.destroyImages(publicIds);
+
+  sendSuccess(res, 'Images removed', { removed: publicIds.length });
+};

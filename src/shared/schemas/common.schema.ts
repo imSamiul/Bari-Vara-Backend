@@ -34,6 +34,12 @@ export const imageSchema = z.object({
 
 export type FlatImage = z.infer<typeof imageSchema>;
 
+export const destroyImagesSchema = z.object({
+  publicIds: z.array(z.string().min(1)).min(1).max(10),
+});
+
+export type DestroyImagesInput = z.infer<typeof destroyImagesSchema>;
+
 export const isoDateSchema = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD');

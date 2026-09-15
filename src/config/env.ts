@@ -47,6 +47,10 @@ const envSchema = z
     SMTP_PASSWORD: z.string().optional(),
     MAIL_FROM: z.string().default('Bari Vara <no-reply@bari-vara.local>'),
 
+    // Optional everywhere: without it the Google route answers 503 and the
+    // frontend hides its button, so a missing key never blocks a deploy.
+    GOOGLE_CLIENT_ID: z.string().optional(),
+
     OTP_TTL_SECONDS: z.coerce.number().int().positive().default(300),
     OTP_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
     OTP_RESEND_COOLDOWN_SECONDS: z.coerce.number().int().positive().default(60),

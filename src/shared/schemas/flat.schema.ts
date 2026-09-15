@@ -16,11 +16,24 @@ import {
 } from './common.schema.js';
 
 export const flatAddressSchema = z.object({
-  line1: z.string().trim().min(4).max(160),
+  line1: z
+    .string()
+    .trim()
+    .min(4, 'Enter at least 4 characters')
+    .max(160, 'Street address is too long'),
   area: z.enum(DHAKA_AREAS),
   city: z.string().trim().min(2).max(80).default('Dhaka'),
   division: z.enum(BANGLADESH_DIVISIONS).default('Dhaka'),
-  postcode: z.string().trim().min(4).max(10).optional(),
+  postcode: z.preprocess(
+    (value) =>
+      typeof value === 'string' && value.trim() === '' ? undefined : value,
+    z
+      .string()
+      .trim()
+      .min(4, 'Postcode must be at least 4 characters')
+      .max(10, 'Postcode must be at most 10 characters')
+      .optional(),
+  ),
 });
 
 export type FlatAddress = z.infer<typeof flatAddressSchema>;
@@ -42,7 +55,13 @@ export const createFlatSchema = z.object({
   coordinates: z.tuple([z.number(), z.number()]).optional(),
 });
 
-export const updateFlatSchema = createFlatSchema.partial();
+/**
+ * Owners flip a listing between available and booked from the dashboard, so
+ * status is updatable even though it is never set at creation time.
+ */
+export const updateFlatSchema = createFlatSchema.partial().extend({
+  status: z.enum(FLAT_STATUSES).optional(),
+});
 
 export const flatQuerySchema = paginationQuerySchema.extend({
   search: z.string().trim().max(120).optional(),

@@ -45,7 +45,7 @@ Password for all: `Password123`
 ```
 src/
   app.ts / server.ts / routes.ts
-  config/          # env (zod), db, redis, mailer, cloudinary, logger
+  config/          # env (zod), db, redis, mailer, cloudinary
   middleware/      # requireAuth, validate, rateLimit, upload, errorHandler
   models/          # User, Flat, Booking, Review
   modules/<domain>/
@@ -101,7 +101,7 @@ src/
 
 | Prefix | Notes |
 | --- | --- |
-| `/auth` | register, OTP, login, refresh, logout, password reset, me |
+| `/auth` | register, OTP, login, google (ID token), refresh, logout, password reset, me |
 | `/users` | me profile, owner-request; admin list/role/review |
 | `/flats` | public list/detail; owner CRUD; `/:id/reviews` nested |
 | `/bookings` | create, me, received, status, cancel |
@@ -121,15 +121,17 @@ Vitest + Supertest; `src/test/helpers.ts` for users/flats/sign-in.
 ```bash
 cp .env.example .env
 pnpm install
-pnpm docker:up
+pnpm docker:up   # Redis only — point MONGODB_URI at Atlas or a local mongod
 pnpm seed
 pnpm dev
 ```
 
 - Local API: http://localhost:5000/health
-- Host: Render/Railway/Fly — build `pnpm install && pnpm build`, start `pnpm start`
-- Needs MongoDB (Atlas) + Redis (Upstash etc.) in production
-- Set `CORS_ORIGIN` to the Vercel frontend origin
+- **Production (free):** Render Web Service + MongoDB Atlas M0 + Upstash Redis
+- Blueprint: [`render.yaml`](./render.yaml) — build `corepack enable && pnpm install --frozen-lockfile && pnpm build`, start `pnpm start`, health `/health`
+- `tsx` is a **runtime** dependency (required for `pnpm start` on Render)
+- Set `CORS_ORIGIN` to the Vercel frontend origin; leave `COOKIE_DOMAIN` empty
+- Vercel: set `API_ORIGIN` to `https://YOUR-SERVICE.onrender.com` and leave `NEXT_PUBLIC_API_BASE_URL` empty
 
 ---
 

@@ -2,7 +2,6 @@ import type { DhakaArea } from '#shared';
 import dayjs from 'dayjs';
 
 import { connectDatabase, disconnectDatabase } from '../config/db.js';
-import { logger } from '../config/logger.js';
 import { Booking, Flat, Review, User } from '../models/index.js';
 import { hashPassword } from '../modules/auth/password.js';
 import { AREA_CENTROIDS } from '../modules/flats/geocode.js';
@@ -77,8 +76,6 @@ async function seed() {
     Flat.deleteMany({}),
     User.deleteMany({}),
   ]);
-  logger.info('Cleared existing collections');
-
   const passwordHash = await hashPassword(DEMO_PASSWORD);
 
   const users = await User.create(
@@ -99,8 +96,6 @@ async function seed() {
   if (!firstOwner || !secondOwner || !firstTenant || !secondTenant) {
     throw new Error('Seed users are misconfigured');
   }
-
-  logger.info(`Created ${users.length} users`);
 
   const flats = await Flat.create(
     SEED_FLATS.map((flat, index) => ({
@@ -138,8 +133,6 @@ async function seed() {
     })),
   );
 
-  logger.info(`Created ${flats.length} flats`);
-
   const reviews = await Review.create(
     SEED_REVIEWS.map((review, index) => {
       const flat = flats[review.flatIndex];
@@ -159,8 +152,6 @@ async function seed() {
       };
     }),
   );
-
-  logger.info(`Created ${reviews.length} reviews`);
 
   const [pendingFlat, approvedFlat] = [flats[2], flats[4]];
   if (!pendingFlat || !approvedFlat)
@@ -190,7 +181,7 @@ async function seed() {
     },
   ]);
 
-  // An approved booking takes the flat off the market.
+  // Demo a rented listing separately — approving a visit does not auto-book.
   await Flat.updateOne({ _id: approvedFlat._id }, { status: 'booked' });
 
   // Rollups are stored on the documents so listing pages never aggregate reviews.
@@ -203,8 +194,7 @@ async function seed() {
     ),
   );
 
-  logger.info('Created 2 bookings');
-  logger.info(
+  console.log(
     `Seed complete. Sign in with any of ${DEMO_USERS.map((u) => u.email).join(', ')} using password ${DEMO_PASSWORD}`,
   );
 
@@ -212,7 +202,7 @@ async function seed() {
 }
 
 seed().catch(async (error) => {
-  logger.error({ err: error }, 'Seed failed');
+  console.error('Seed failed', error);
   await disconnectDatabase().catch(() => undefined);
   process.exit(1);
 });

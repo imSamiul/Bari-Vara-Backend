@@ -4,7 +4,6 @@ import { MulterError } from 'multer';
 import { ZodError } from 'zod';
 
 import { isProduction } from '../config/env.js';
-import { logger } from '../config/logger.js';
 import { ApiError } from '../utils/ApiError.js';
 
 export const notFoundHandler: RequestHandler = (req, _res, next) => {
@@ -93,19 +92,19 @@ function normalize(error: unknown): NormalizedError {
 
   return {
     statusCode: 500,
-    message: 'Something went wrong',
+    message:
+      isProduction || !(error instanceof Error)
+        ? 'Something went wrong'
+        : error.message || 'Something went wrong',
     code: 'INTERNAL_ERROR',
   };
 }
 
-export const errorHandler: ErrorRequestHandler = (error, req, res, _next) => {
+export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
   const { statusCode, message, code, details } = normalize(error);
 
   if (statusCode >= 500) {
-    logger.error(
-      { err: error, method: req.method, url: req.originalUrl },
-      'Unhandled request error',
-    );
+    console.error('[api]', code, message, error);
   }
 
   res.status(statusCode).json({

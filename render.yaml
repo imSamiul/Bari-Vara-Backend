@@ -1,10 +1,62 @@
+# Blueprint for https://dashboard.render.com → New → Blueprint
+# Root Directory must be `backend` if this file lives in a monorepo.
 services:
   - type: web
     name: bari-vara-api
     runtime: node
+    plan: free
     buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build
     startCommand: pnpm start
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
+      - key: API_PREFIX
+        value: /api/v1
+      - key: ACCESS_TOKEN_TTL_MINUTES
+        value: "15"
+      - key: REFRESH_TOKEN_TTL_DAYS
+        value: "7"
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
+      - key: OTP_TTL_SECONDS
+        value: "300"
+      - key: OTP_MAX_ATTEMPTS
+        value: "5"
+      - key: OTP_RESEND_COOLDOWN_SECONDS
+        value: "60"
+      - key: FLAT_CACHE_TTL_SECONDS
+        value: "60"
+      # Leave empty for Vercel + Render (cross-site cookies use SameSite=None).
+      - key: COOKIE_DOMAIN
+        value: ""
+      # Set these in the Render dashboard (Blueprint will prompt for sync:false).
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      # Optional: leave empty to disable "Sign in with Google".
+      - key: GOOGLE_CLIENT_ID
+        sync: false

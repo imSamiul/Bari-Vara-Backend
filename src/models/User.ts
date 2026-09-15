@@ -16,6 +16,8 @@ export interface UserDocument {
   email: string;
   /** Always a bcrypt digest. Hashing lives in modules/auth/password.ts. */
   passwordHash?: string;
+  /** Google's stable subject id, set once the account is linked to Google. */
+  googleId?: string;
   role: UserRole;
   authProvider: AuthProvider;
   phone: string | null;
@@ -40,6 +42,8 @@ const userSchema = new Schema<UserDocument, Model<UserDocument>>(
     },
     // Absent for accounts created through a social provider.
     passwordHash: { type: String, select: false },
+    // Sparse so the many accounts without one do not collide on null.
+    googleId: { type: String, unique: true, sparse: true },
     role: { type: String, enum: USER_ROLES, default: 'user', index: true },
     authProvider: { type: String, enum: AUTH_PROVIDERS, default: 'local' },
     phone: { type: String, default: null, trim: true },

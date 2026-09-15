@@ -37,8 +37,14 @@ export const resetPasswordSchema = z.object({
   password: passwordSchema,
 });
 
+export const googleLoginSchema = z.object({
+  /** The ID token (JWT) Google Identity Services hands to the browser. */
+  credential: z.string().min(1),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type EmailOnlyInput = z.infer<typeof emailOnlySchema>;
 export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+export type GoogleLoginInput = z.infer<typeof googleLoginSchema>;

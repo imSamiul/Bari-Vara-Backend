@@ -1,19 +1,4 @@
 services:
-  mongo:
-    image: mongo:8
-    container_name: bari-vara-mongo
-    restart: unless-stopped
-    # Override the host port when another project already binds the default.
-    ports:
-      - '${MONGO_PORT:-27017}:27017'
-    volumes:
-      - mongo-data:/data/db
-    healthcheck:
-      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   redis:
     image: redis:8-alpine
     container_name: bari-vara-redis
@@ -29,5 +14,4 @@ services:
       retries: 5
 
 volumes:
-  mongo-data:
   redis-data:

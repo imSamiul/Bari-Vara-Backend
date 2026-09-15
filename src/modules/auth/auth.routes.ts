@@ -1,5 +1,6 @@
 import {
   emailOnlySchema,
+  googleLoginSchema,
   loginSchema,
   registerSchema,
   resetPasswordSchema,
@@ -40,6 +41,13 @@ authRoutes.post(
   authLimiter,
   validate({ body: loginSchema }),
   authController.login,
+);
+
+authRoutes.post(
+  '/google',
+  authLimiter,
+  validate({ body: googleLoginSchema }),
+  authController.googleLogin,
 );
 
 authRoutes.post(

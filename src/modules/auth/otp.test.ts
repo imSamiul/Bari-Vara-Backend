@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createApp } from '../../app.js';
 import { env } from '../../config/env.js';
-import { User } from '../../models/index.js';
+import { Otp, User } from '../../models/index.js';
 import { TEST_PASSWORD, apiPath, readCookie } from '../../test/helpers.js';
 import { ACCESS_COOKIE, REFRESH_COOKIE } from './cookies.js';
 
@@ -65,6 +65,23 @@ describe('email verification', () => {
     expect(response.body.data.isEmailVerified).toBe(true);
     expect(readCookie(response, ACCESS_COOKIE)).toBeDefined();
     expect(readCookie(response, REFRESH_COOKIE)).toBeDefined();
+  });
+
+  it('stores a lookup row by email and name until the code is used', async () => {
+    await register();
+
+    const byEmail = await Otp.findOne({ email: EMAIL });
+    expect(byEmail).toMatchObject({
+      name: 'Nasrin Akter',
+      purpose: 'verify-email',
+      code: latestOtp(),
+    });
+
+    const byName = await Otp.findOne({ name: /nasrin/i });
+    expect(byName?.email).toBe(EMAIL);
+
+    await verify(latestOtp());
+    expect(await Otp.findOne({ email: EMAIL })).toBeNull();
   });
 
   it('lets the user sign in only after verifying', async () => {

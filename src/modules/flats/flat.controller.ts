@@ -3,12 +3,15 @@ import type {
   FlatQuery,
   UpdateFlatInput,
 } from '#shared';
+import { createFlatSchema } from '#shared';
 import type { RequestHandler } from 'express';
 
 import { authContext } from '../../middleware/requireAuth.js';
 import { validatedQuery } from '../../middleware/validate.js';
+import { ApiError } from '../../utils/ApiError.js';
 import { cached } from '../../utils/cache.js';
 import { buildPagination, sendSuccess } from '../../utils/response.js';
+import * as uploadService from '../uploads/upload.service.js';
 import * as flatService from './flat.service.js';
 import { toFlatDetail, toFlatSummary } from './flat.serializer.js';
 
@@ -58,14 +61,42 @@ export const detail: RequestHandler<{ id: string }> = async (req, res) => {
   sendSuccess(res, flat.title, toFlatDetail(flat, flat.owner));
 };
 
-export const create: RequestHandler<
-  Record<string, string>,
-  unknown,
-  CreateFlatInput
-> = async (req, res) => {
-  const flat = await flatService.createFlat(authContext(req).id, req.body);
+export const create: RequestHandler = async (req, res) => {
+  const files = Array.isArray(req.files) ? req.files : [];
+  let input: CreateFlatInput;
+  let uploadedPublicIds: string[] = [];
 
-  sendSuccess(res, 'Listing published', toFlatSummary(flat), 201);
+  if (files.length > 0) {
+    let raw: unknown = req.body;
+
+    if (typeof req.body?.data === 'string') {
+      try {
+        raw = JSON.parse(req.body.data);
+      } catch {
+        throw ApiError.badRequest(
+          'Listing data must be valid JSON in the "data" field',
+          'INVALID_LISTING_PAYLOAD',
+        );
+      }
+    }
+
+    const details = createFlatSchema.omit({ images: true }).parse(raw);
+    const images = await uploadService.uploadImages(files);
+    uploadedPublicIds = images.map((image) => image.publicId);
+    input = { ...details, images };
+  } else {
+    input = createFlatSchema.parse(req.body);
+  }
+
+  try {
+    const flat = await flatService.createFlat(authContext(req).id, input);
+    sendSuccess(res, 'Listing published', toFlatSummary(flat), 201);
+  } catch (error) {
+    if (uploadedPublicIds.length > 0) {
+      await uploadService.destroyImages(uploadedPublicIds);
+    }
+    throw error;
+  }
 };
 
 export const update: RequestHandler<

@@ -1,7 +1,7 @@
+/* eslint-disable no-console */
 import { createApp } from './app.js';
 import { connectDatabase, disconnectDatabase } from './config/db.js';
 import { env } from './config/env.js';
-import { logger } from './config/logger.js';
 import { connectRedis, disconnectRedis } from './config/redis.js';
 
 async function bootstrap() {
@@ -9,14 +9,12 @@ async function bootstrap() {
   await connectRedis();
 
   const server = createApp().listen(env.PORT, () => {
-    logger.info(
+    console.log(
       `API listening on http://localhost:${env.PORT}${env.API_PREFIX}`,
     );
   });
 
-  const shutdown = async (signal: string) => {
-    logger.info(`${signal} received, shutting down`);
-
+  const shutdown = async (_signal: string) => {
     server.close(async () => {
       await Promise.allSettled([disconnectDatabase(), disconnectRedis()]);
       process.exit(0);
@@ -28,6 +26,6 @@ async function bootstrap() {
 }
 
 bootstrap().catch((error) => {
-  logger.error({ err: error }, 'Failed to start API');
+  console.error('Failed to start API', error);
   process.exit(1);
 });

@@ -2,9 +2,11 @@ import { Writable } from 'node:stream';
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { cloudinary } from '../../config/cloudinary.js';
 import { createApp } from '../../app.js';
 import { MAX_IMAGE_BYTES } from '../../middleware/upload.js';
 import { apiPath, createTestUser, signIn } from '../../test/helpers.js';
+import { destroyImages } from './upload.service.js';
 
 /**
  * Cloudinary is stubbed rather than called, so the suite covers the request
@@ -37,6 +39,9 @@ vi.mock('../../config/cloudinary.js', () => ({
           },
         }),
       destroy: vi.fn().mockResolvedValue({ result: 'ok' }),
+    },
+    api: {
+      delete_resources: vi.fn().mockResolvedValue({ deleted: {} }),
     },
   },
 }));
@@ -146,5 +151,59 @@ describe('POST /uploads/images', () => {
 
     expect(response.status).toBe(201);
     expect(response.body.data).toHaveLength(2);
+  });
+});
+
+describe('destroyImages', () => {
+  beforeEach(() => {
+    cloudinaryStub.isConfigured = true;
+    vi.mocked(cloudinary.api.delete_resources).mockClear();
+    vi.mocked(cloudinary.uploader.destroy).mockClear();
+    vi.mocked(cloudinary.api.delete_resources).mockResolvedValue({
+      deleted: {},
+    } as never);
+  });
+
+  it('batch-deletes only assets under the upload folder', async () => {
+    await destroyImages([
+      'bari-vara/flats/a',
+      'bari-vara/flats/a',
+      'seed/unsplash',
+      'someone-else/x',
+    ]);
+
+    expect(cloudinary.api.delete_resources).toHaveBeenCalledWith(
+      ['bari-vara/flats/a'],
+      expect.objectContaining({
+        resource_type: 'image',
+        type: 'upload',
+        invalidate: true,
+      }),
+    );
+    expect(cloudinary.uploader.destroy).not.toHaveBeenCalled();
+  });
+
+  it('falls back to per-asset destroy when the batch API fails', async () => {
+    vi.mocked(cloudinary.api.delete_resources).mockRejectedValueOnce(
+      new Error('batch failed'),
+    );
+
+    await destroyImages(['bari-vara/flats/room']);
+
+    expect(cloudinary.uploader.destroy).toHaveBeenCalledWith(
+      'bari-vara/flats/room',
+      expect.objectContaining({
+        resource_type: 'image',
+        invalidate: true,
+      }),
+    );
+  });
+
+  it('no-ops when Cloudinary is not configured', async () => {
+    cloudinaryStub.isConfigured = false;
+
+    await destroyImages(['bari-vara/flats/room']);
+
+    expect(cloudinary.api.delete_resources).not.toHaveBeenCalled();
   });
 });

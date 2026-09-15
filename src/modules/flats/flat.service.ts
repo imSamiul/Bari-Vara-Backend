@@ -158,6 +158,11 @@ export async function deleteFlat(flatId: string, actor: Actor) {
   assertCanManage(flat, actor);
 
   const ownerId = String(flat.owner);
+  const publicIds = flat.images.map((image) => image.publicId);
+
+  // Drop Cloudinary assets first so a crash after Mongo delete cannot orphan them.
+  // destroyImages never throws — listing removal must still succeed if Cloudinary is down.
+  await destroyImages(publicIds);
 
   // Reviews and bookings only exist in the context of their flat, so they go too
   // rather than becoming unreachable rows.
@@ -168,7 +173,6 @@ export async function deleteFlat(flatId: string, actor: Actor) {
   ]);
 
   await Promise.all([
-    destroyImages(flat.images.map((image) => image.publicId)),
     refreshOwnerRating(ownerId),
     invalidate(FLAT_LIST_CACHE),
   ]);

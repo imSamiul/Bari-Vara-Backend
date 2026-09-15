@@ -3,12 +3,11 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
-import { pinoHttp } from 'pino-http';
 
-import { corsOrigins, env, isTest } from './config/env.js';
-import { logger } from './config/logger.js';
+import { corsOrigins, env } from './config/env.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { apiLimiter } from './middleware/rateLimit.js';
+import { requestLog } from './middleware/requestLog.js';
 import { routes } from './routes.js';
 
 export function createApp() {
@@ -28,10 +27,7 @@ export function createApp() {
   app.use(express.json({ limit: '1mb' }));
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());
-
-  if (!isTest) {
-    app.use(pinoHttp({ logger }));
-  }
+  app.use(requestLog);
 
   app.get('/health', (_req, res) => {
     res.json({

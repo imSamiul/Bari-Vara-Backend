@@ -1,6 +1,7 @@
 import {
   ERROR_CODES,
   type EmailOnlyInput,
+  type GoogleLoginInput,
   type LoginInput,
   type RegisterInput,
   type ResetPasswordInput,
@@ -15,6 +16,11 @@ import {
 } from '../../emails/otpEmail.js';
 import { User } from '../../models/index.js';
 import { ApiError } from '../../utils/ApiError.js';
+import {
+  isGoogleConfigured,
+  verifyGoogleIdToken,
+  type GoogleProfile,
+} from './google.js';
 import { issueOtp, verifyOtp } from './otp.service.js';
 import { hashPassword, verifyPassword } from './password.js';
 import {
@@ -59,7 +65,7 @@ export async function registerUser(input: RegisterInput) {
     passwordHash: await hashPassword(input.password),
   });
 
-  const otp = await issueOtp('verify-email', user.email);
+  const otp = await issueOtp('verify-email', user.email, { name: user.name });
   await sendMail({
     to: user.email,
     ...buildVerificationEmail(user.name, otp),
@@ -102,7 +108,7 @@ export async function resendVerificationOtp(input: EmailOnlyInput) {
 
   if (!user || user.isEmailVerified) return;
 
-  const otp = await issueOtp('verify-email', user.email);
+  const otp = await issueOtp('verify-email', user.email, { name: user.name });
   await sendMail({
     to: user.email,
     ...buildVerificationEmail(user.name, otp),
@@ -115,7 +121,7 @@ export async function requestPasswordReset(input: EmailOnlyInput) {
 
   if (!user) return;
 
-  const otp = await issueOtp('reset-password', user.email);
+  const otp = await issueOtp('reset-password', user.email, { name: user.name });
   await sendMail({
     to: user.email,
     ...buildPasswordResetEmail(user.name, otp),
@@ -168,6 +174,75 @@ export async function loginUser(input: LoginInput) {
       'Verify your email before signing in',
       ERROR_CODES.emailNotVerified,
     );
+  }
+
+  return { user, tokens: await issueTokenPair(String(user._id), user.role) };
+}
+
+/**
+ * Signs in with a Google ID token, creating the account on first use or
+ * linking to an existing account with the same email.
+ */
+export async function loginWithGoogle(input: GoogleLoginInput) {
+  if (!isGoogleConfigured) {
+    throw new ApiError(
+      503,
+      'Google sign-in is not configured',
+      ERROR_CODES.googleNotConfigured,
+    );
+  }
+
+  let profile: GoogleProfile;
+
+  try {
+    profile = await verifyGoogleIdToken(input.credential);
+  } catch {
+    throw ApiError.unauthorized(
+      'Google sign-in failed. Try again.',
+      ERROR_CODES.googleTokenInvalid,
+    );
+  }
+
+  // Linking by email is only safe when Google itself vouches for the address.
+  if (!profile.emailVerified) {
+    throw ApiError.forbidden(
+      'Verify this email with Google before using it to sign in',
+      ERROR_CODES.googleEmailUnverified,
+    );
+  }
+
+  const email = profile.email.toLowerCase();
+  // Google photos have no Cloudinary id; the sentinel keeps the schema happy
+  // and upload.service ignores anything outside its own folder on destroy.
+  const avatar = profile.picture
+    ? { url: profile.picture, publicId: `google:${profile.sub}` }
+    : null;
+
+  let user = await User.findOne({ googleId: profile.sub });
+
+  if (!user) {
+    user = await User.findOne({ email }).select('+passwordHash');
+
+    if (user) {
+      // A password on an address nobody has confirmed could have been set by
+      // someone squatting on this email before its owner showed up, so it is
+      // dropped rather than trusted. The owner can set one via forgot-password.
+      if (!user.isEmailVerified) user.passwordHash = undefined;
+
+      user.googleId = profile.sub;
+      user.isEmailVerified = true;
+      if (!user.avatar && avatar) user.avatar = avatar;
+      await user.save();
+    } else {
+      user = await User.create({
+        name: (profile.name ?? email.split('@')[0] ?? email).slice(0, 80),
+        email,
+        googleId: profile.sub,
+        authProvider: 'google',
+        isEmailVerified: true,
+        avatar,
+      });
+    }
   }
 
   return { user, tokens: await issueTokenPair(String(user._id), user.role) };

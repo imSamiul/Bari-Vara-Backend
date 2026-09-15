@@ -1,12 +1,11 @@
 import nodemailer from 'nodemailer';
 
 import { env } from './env.js';
-import { logger } from './logger.js';
 
 /**
  * Without SMTP credentials the transport serialises the message instead of
- * sending it, so a fresh clone can run the OTP flow with the code read from the
- * API log. Production validation in env.ts guarantees real credentials there.
+ * sending it. In development/test the message body (including the OTP) is
+ * always printed so local signup works even when Gmail SMTP is configured.
  */
 const hasSmtpCredentials = Boolean(
   env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASSWORD,
@@ -27,19 +26,10 @@ export async function sendMail(message: {
   html: string;
   text: string;
 }) {
-  const info = await transporter.sendMail({ from: env.MAIL_FROM, ...message });
+  await transporter.sendMail({ from: env.MAIL_FROM, ...message });
 
-  if (hasSmtpCredentials) {
-    logger.debug({ to: message.to, subject: message.subject }, 'Email sent');
-    return;
+  if (env.NODE_ENV !== 'production') {
+    const via = hasSmtpCredentials ? 'SMTP' : 'JSON transport (no SMTP)';
+    console.info(`[mail:${via}] to ${message.to}\n${message.text}`);
   }
-
-  logger.info(
-    { to: message.to, subject: message.subject, body: message.text },
-    'Email not sent: no SMTP credentials configured. Body logged instead.',
-  );
-  logger.debug(
-    { messageId: info.messageId },
-    'Email captured by jsonTransport',
-  );
 }

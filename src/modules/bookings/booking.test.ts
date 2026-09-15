@@ -30,7 +30,12 @@ beforeEach(async () => {
     email: 'owner@barivara.test',
     role: 'owner',
   });
-  await createTestUser({ name: 'Tenant Person', email: 'tenant@barivara.test' });
+  await createTestUser({
+    name: 'Tenant Person',
+    email: 'tenant@barivara.test',
+    phone: '01711000099',
+    address: 'House 1, Road 2, Dhanmondi, Dhaka',
+  });
 
   const flat = await createTestFlat(String(owner._id));
   flatId = String(flat._id);
@@ -84,6 +89,22 @@ describe('POST /bookings', () => {
       .send({ status: 'rejected' });
 
     expect((await createBooking()).status).toBe(201);
+  });
+
+  it('needs a phone number and address on the tenant profile', async () => {
+    await createTestUser({
+      name: 'Bare Tenant',
+      email: 'bare-tenant@barivara.test',
+    });
+    const bareCookie = await signIn(app, 'bare-tenant@barivara.test');
+
+    const response = await request(app)
+      .post(apiPath('/bookings'))
+      .set('Cookie', bareCookie)
+      .send(bookingPayload());
+
+    expect(response.status).toBe(403);
+    expect(response.body.code).toBe('PROFILE_INCOMPLETE');
   });
 
   it('refuses a listing that is already taken', async () => {
@@ -166,7 +187,7 @@ describe('PATCH /bookings/:id/status', () => {
     bookingId = (await createBooking()).body.data.id;
   });
 
-  it('takes the listing off the market when the owner approves', async () => {
+  it('approves the visit without taking the listing off the market', async () => {
     const response = await request(app)
       .patch(apiPath(`/bookings/${bookingId}/status`))
       .set('Cookie', ownerCookie)
@@ -177,7 +198,7 @@ describe('PATCH /bookings/:id/status', () => {
       status: 'approved',
       ownerNote: 'See you at 4pm.',
     });
-    expect((await Flat.findById(flatId))?.status).toBe('booked');
+    expect((await Flat.findById(flatId))?.status).toBe('available');
   });
 
   it('leaves the listing available when the owner rejects', async () => {

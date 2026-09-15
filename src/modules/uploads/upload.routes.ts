@@ -1,7 +1,9 @@
+import { destroyImagesSchema } from '#shared';
 import { Router } from 'express';
 
 import { requireAuth, requireRole } from '../../middleware/requireAuth.js';
 import { uploadImageArray, uploadSingleImage } from '../../middleware/upload.js';
+import { validate } from '../../middleware/validate.js';
 import * as uploadController from './upload.controller.js';
 
 export const uploadRoutes = Router();
@@ -11,3 +13,8 @@ uploadRoutes.use(requireAuth, requireRole('owner', 'admin'));
 
 uploadRoutes.post('/image', uploadSingleImage, uploadController.uploadOne);
 uploadRoutes.post('/images', uploadImageArray, uploadController.uploadMany);
+uploadRoutes.post(
+  '/destroy',
+  validate({ body: destroyImagesSchema }),
+  uploadController.destroyMany,
+);

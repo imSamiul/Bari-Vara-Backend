@@ -1,24 +1,26 @@
 import { Redis } from 'ioredis';
 
 import { env } from './env.js';
-import { logger } from './logger.js';
 
 export const redis = new Redis(env.REDIS_URL, {
   maxRetriesPerRequest: null,
   lazyConnect: true,
 });
 
-redis.on('error', (error: Error) => {
-  logger.error({ err: error }, 'Redis error');
+redis.on('error', () => {
+  // Avoid unhandled 'error' events crashing the process.
 });
 
+/**
+ * lazyConnect leaves the client in `wait` until the first connect(). Hot reload
+ * can re-enter bootstrap while status is already `connecting` / `connect` /
+ * `ready` — calling connect() again throws and aborts startup.
+ */
 export async function connectRedis() {
-  if (redis.status === 'ready' || redis.status === 'connecting') return;
+  if (redis.status !== 'wait') return;
   await redis.connect();
-  logger.info('Redis connected');
 }
 
 export async function disconnectRedis() {
   await redis.quit();
-  logger.info('Redis disconnected');
 }

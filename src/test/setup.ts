@@ -19,7 +19,7 @@ beforeAll(async () => {
 
   // Redis is real rather than mocked so refresh rotation is exercised against
   // the same commands production runs. Docker Compose provides it locally and a
-  // service container provides it in CI.
+  // service container provides it in CI. Mongo for tests is in-memory.
   await connectRedis();
 
   // Test files run in parallel against one Redis server, so each worker takes a

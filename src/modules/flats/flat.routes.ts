@@ -4,14 +4,26 @@ import {
   idParamSchema,
   updateFlatSchema,
 } from '#shared';
-import { Router } from 'express';
+import { Router, type RequestHandler } from 'express';
 
 import { requireAuth, requireRole } from '../../middleware/requireAuth.js';
+import { uploadImageArray } from '../../middleware/upload.js';
 import { validate } from '../../middleware/validate.js';
 import { flatReviewRoutes } from '../reviews/review.routes.js';
 import * as flatController from './flat.controller.js';
 
 export const flatRoutes = Router();
+
+/** JSON create stays as-is; browser publish sends multipart with photos. */
+const maybeParseMultipartImages: RequestHandler = (req, res, next) => {
+  const contentType = req.headers['content-type'] ?? '';
+  if (!contentType.includes('multipart/form-data')) {
+    next();
+    return;
+  }
+
+  uploadImageArray(req, res, next);
+};
 
 // Must be declared before /:id or "mine" is read as an id.
 flatRoutes.get(
@@ -28,7 +40,7 @@ flatRoutes.post(
   '/',
   requireAuth,
   requireRole('owner', 'admin'),
-  validate({ body: createFlatSchema }),
+  maybeParseMultipartImages,
   flatController.create,
 );
 
