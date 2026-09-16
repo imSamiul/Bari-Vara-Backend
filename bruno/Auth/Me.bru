@@ -1,0 +1,17 @@
+meta {
+  name: Me
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}{{apiPrefix}}/auth/me
+  body: none
+  auth: none
+}
+
+docs {
+  # Me
+
+  Returns the signed-in `PublicUser`. Requires `bv_access` cookie.
+}

@@ -1,0 +1,23 @@
+meta {
+  name: List Received Bookings
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}{{apiPrefix}}/bookings/received?page=1&limit=12&status=pending
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 1
+  limit: 12
+  status: pending
+}
+
+docs {
+  # List Received Bookings
+
+  Owner/admin inbox of visit requests on their listings.
+}

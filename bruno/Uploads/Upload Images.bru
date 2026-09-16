@@ -1,0 +1,22 @@
+meta {
+  name: Upload Images
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/uploads/images
+  body: multipartForm
+  auth: none
+}
+
+body:multipart-form {
+  images: @file(/absolute/path/to/photo-1.jpg)
+  images: @file(/absolute/path/to/photo-2.jpg)
+}
+
+docs {
+  # Upload Images
+
+  Field name: `images` (array). Returns an array of `{ url, publicId }`.
+}

@@ -1,0 +1,17 @@
+meta {
+  name: Cancel Booking
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}{{apiPrefix}}/bookings/{{bookingId}}
+  body: none
+  auth: none
+}
+
+docs {
+  # Cancel Booking
+
+  Tenant (or admin) cancels a **pending** request only.
+}

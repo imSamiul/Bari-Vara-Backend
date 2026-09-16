@@ -1,0 +1,17 @@
+meta {
+  name: Get Flat
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}{{apiPrefix}}/flats/{{flatId}}
+  body: none
+  auth: none
+}
+
+docs {
+  # Get Flat
+
+  Public detail including description, amenities, and owner summary.
+}

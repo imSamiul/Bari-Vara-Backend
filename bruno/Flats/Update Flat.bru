@@ -1,0 +1,28 @@
+meta {
+  name: Update Flat
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{baseUrl}}{{apiPrefix}}/flats/{{flatId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "monthlyRent": 34000,
+    "description": "Updated description with fresh paint and a working geyser."
+  }
+}
+
+docs {
+  # Update Flat
+
+  Owner of the listing or admin. Partial body (any create-flat fields).
+}

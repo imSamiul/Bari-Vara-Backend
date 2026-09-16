@@ -1,0 +1,46 @@
+meta {
+  name: Verify OTP
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/auth/verify-otp
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "{{registerEmail}}",
+    "otp": "{{otp}}"
+  }
+}
+
+docs {
+  # Verify OTP
+
+  Confirms the email and **signs the user in** (sets auth cookies).
+
+  OTP: 6 digits, 5 minute TTL, max 5 wrong attempts.
+
+  **Example response**
+
+  ```json
+  {
+    "success": true,
+    "message": "Email verified",
+    "data": {
+      "id": "…",
+      "name": "Nusrat Jahan",
+      "email": "new.user@example.com",
+      "role": "user",
+      "isEmailVerified": true
+    }
+  }
+  ```
+}

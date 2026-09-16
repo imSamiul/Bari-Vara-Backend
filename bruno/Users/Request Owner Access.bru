@@ -1,0 +1,18 @@
+meta {
+  name: Request Owner Access
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/users/me/owner-request
+  body: none
+  auth: none
+}
+
+docs {
+  # Request Owner Access
+
+  Tenant → pending owner application. Requires phone + address on the profile.
+  Admin later approves via Review Owner Request.
+}

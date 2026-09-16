@@ -1,0 +1,27 @@
+meta {
+  name: Review Owner Request
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{baseUrl}}{{apiPrefix}}/users/{{userId}}/owner-request
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "decision": "approved"
+  }
+}
+
+docs {
+  # Review Owner Request (admin)
+
+  `decision`: `approved` | `rejected`. User must already be `pending`.
+}

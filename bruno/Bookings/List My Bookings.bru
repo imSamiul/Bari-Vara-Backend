@@ -1,0 +1,23 @@
+meta {
+  name: List My Bookings
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}{{apiPrefix}}/bookings/me?page=1&limit=12
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 1
+  limit: 12
+  ~status: pending
+}
+
+docs {
+  # List My Bookings
+
+  Tenant side. Optional `status`: pending \| approved \| rejected \| cancelled.
+}

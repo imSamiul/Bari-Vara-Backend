@@ -1,0 +1,32 @@
+meta {
+  name: Create Booking
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/bookings
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "flatId": "{{flatId}}",
+    "nid": "1234567890",
+    "visitDate": "2026-10-15",
+    "message": "Available after 5pm. Looking for a family flat near the lake."
+  }
+}
+
+docs {
+  # Create Booking
+
+  Signed-in tenant. Cannot book own flat. NID: 10, 13, or 17 digits.
+
+  **Example response (201)** — copy `data.id` → `bookingId`.
+}

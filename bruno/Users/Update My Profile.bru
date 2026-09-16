@@ -1,0 +1,31 @@
+meta {
+  name: Update My Profile
+  type: http
+  seq: 1
+}
+
+patch {
+  url: {{baseUrl}}{{apiPrefix}}/users/me
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Tenant Person",
+    "phone": "01712345678",
+    "address": "House 12, Road 4, Dhanmondi, Dhaka"
+  }
+}
+
+docs {
+  # Update My Profile
+
+  Phone must be 11 digits starting with `01`. Owners must have phone + address before publishing / requesting owner access.
+
+  Optional `avatar`: `{ "url": "https://…", "publicId": "…" }` or `null` to clear.
+}

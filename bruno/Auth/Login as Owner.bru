@@ -1,0 +1,30 @@
+meta {
+  name: Login as Owner
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "{{ownerEmail}}",
+    "password": "{{password}}"
+  }
+}
+
+docs {
+  # Login as Owner
+
+  Demo: `owner@barivara.dev` / `Password123`.
+
+  Needed for Create Flat, My Flats, Received Bookings, Uploads.
+}

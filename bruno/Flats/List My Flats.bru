@@ -1,0 +1,22 @@
+meta {
+  name: List My Flats
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}{{apiPrefix}}/flats/mine?page=1&limit=12
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 1
+  limit: 12
+}
+
+docs {
+  # List My Flats
+
+  Owner/admin only. Same filters as public list, scoped to the signed-in owner.
+}

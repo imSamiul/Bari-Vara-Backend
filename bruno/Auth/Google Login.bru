@@ -1,0 +1,36 @@
+meta {
+  name: Google Login
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/auth/google
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "credential": "{{googleIdToken}}"
+  }
+}
+
+docs {
+  # Google Login
+
+  Exchanges a Google Identity Services ID token for the `bv_access` + `bv_refresh` cookies.
+
+  To get a token: sign in with Google on the web app with DevTools open and copy
+  `credential` from the `POST /auth/google` request body. Tokens expire after about an hour.
+
+  Links to an existing account with the same email, otherwise creates one with
+  `authProvider: "google"` and `isEmailVerified: true`.
+
+  Errors: `401 GOOGLE_TOKEN_INVALID`, `403 GOOGLE_EMAIL_UNVERIFIED`,
+  `503 GOOGLE_NOT_CONFIGURED` (API has no `GOOGLE_CLIENT_ID`).
+}

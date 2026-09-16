@@ -1,0 +1,17 @@
+meta {
+  name: Delete Flat
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{baseUrl}}{{apiPrefix}}/flats/{{flatId}}
+  body: none
+  auth: none
+}
+
+docs {
+  # Delete Flat
+
+  Owner/admin. Removes the listing and related data as implemented by the service.
+}

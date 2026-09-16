@@ -1,0 +1,46 @@
+meta {
+  name: List Flats
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}{{apiPrefix}}/flats?page=1&limit=12&status=available&sort=-createdAt&area=Dhanmondi
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 1
+  limit: 12
+  status: available
+  sort: -createdAt
+  area: Dhanmondi
+  ~search: 
+  ~category: family
+  ~minRent: 20000
+  ~maxRent: 80000
+  ~bedrooms: 2
+  ~lat: 23.7461
+  ~lng: 90.3742
+  ~radiusKm: 5
+}
+
+docs {
+  # List Flats
+
+  Public. Cached in Redis briefly.
+
+  **Useful query params**
+
+  | Param | Notes |
+  | --- | --- |
+  | `search` | Mongo text search |
+  | `category` | family \| bachelor \| sublet \| office |
+  | `area` | Dhaka area enum (e.g. Dhanmondi) |
+  | `status` | available \| booked |
+  | `sort` | -createdAt \| createdAt \| price \| -price \| -rating |
+  | `lat` `lng` `radiusKm` | Geo filter (km) |
+
+  Copy `data[0].id` → `flatId` env var.
+}

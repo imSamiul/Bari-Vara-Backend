@@ -1,0 +1,31 @@
+meta {
+  name: Decide Booking
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}{{apiPrefix}}/bookings/{{bookingId}}/status
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "status": "approved",
+    "ownerNote": "See you at 5pm. Call when you arrive at the gate."
+  }
+}
+
+docs {
+  # Decide Booking
+
+  Owner/admin. Only while status is `pending`.
+  `status`: `approved` | `rejected`.
+  Approval confirms the visit only — it does not set the flat to `booked`.
+  Owners mark a listing rented via `PATCH /flats/:id` with `{ "status": "booked" }`.
+}

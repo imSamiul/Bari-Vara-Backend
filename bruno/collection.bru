@@ -1,0 +1,63 @@
+meta {
+  name: Bari Vara API
+}
+
+auth {
+  mode: none
+}
+
+docs {
+  # Bari Vara API
+
+  Express API for the Bari Vara rental marketplace. Base path is `/api/v1`
+  (health lives at `/health`).
+
+  ## Auth model
+
+  Access (`bv_access`, 15m) and refresh (`bv_refresh`, 7d) tokens are
+  **httpOnly cookies**. There is no `Authorization` header.
+
+  1. Call **Auth → Login** (or Verify OTP).
+  2. Bruno stores `Set-Cookie` automatically when the cookie jar is on.
+  3. Later requests send those cookies with `credentials`.
+
+  In Bruno: Preferences → enable cookies / cookie jar for this collection.
+
+  ## Response envelope
+
+  Success:
+
+  ```json
+  {
+    "success": true,
+    "message": "…",
+    "data": {},
+    "pagination": { "page": 1, "limit": 12, "total": 0, "totalPages": 1 }
+  }
+  ```
+
+  Error:
+
+  ```json
+  {
+    "success": false,
+    "message": "…",
+    "code": "EMAIL_NOT_VERIFIED"
+  }
+  ```
+
+  ## Demo accounts (after `pnpm seed`)
+
+  | Role   | Email                 | Password     |
+  | ------ | --------------------- | ------------ |
+  | Admin  | admin@barivara.dev    | Password123  |
+  | Owner  | owner@barivara.dev    | Password123  |
+  | Tenant | tenant@barivara.dev   | Password123  |
+
+  ## Suggested flow
+
+  1. Health Check
+  2. Login as tenant → List Flats → Create Booking
+  3. Login as owner → List Received Bookings → Approve/Reject
+  4. Login as admin → Stats Overview / Users
+}

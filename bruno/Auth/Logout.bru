@@ -1,0 +1,17 @@
+meta {
+  name: Logout
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/auth/logout
+  body: none
+  auth: none
+}
+
+docs {
+  # Logout
+
+  Revokes the refresh token family and clears auth cookies.
+}

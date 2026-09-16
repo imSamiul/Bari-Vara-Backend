@@ -1,0 +1,38 @@
+meta {
+  name: Overview
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}{{apiPrefix}}/stats/overview
+  body: none
+  auth: none
+}
+
+docs {
+  # Stats Overview (admin)
+
+  Totals, bookings by status, flats by category/area, and 12 months of activity.
+
+  **Example `data` shape**
+
+  ```json
+  {
+    "totals": {
+      "users": 12,
+      "owners": 3,
+      "flats": 15,
+      "availableFlats": 12,
+      "bookings": 8,
+      "pendingBookings": 2,
+      "reviews": 5,
+      "averageRent": 35000
+    },
+    "bookingsByStatus": [{ "status": "pending", "count": 2 }],
+    "flatsByCategory": [{ "category": "family", "count": 8 }],
+    "flatsByArea": [{ "area": "Dhanmondi", "count": 3, "averageRent": 38000 }],
+    "monthlyActivity": [{ "month": "2026-09", "signups": 2, "listings": 1, "bookings": 3 }]
+  }
+  ```
+}

@@ -1,0 +1,31 @@
+meta {
+  name: Create or Update Review
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/flats/{{flatId}}/reviews
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "flatRating": 4,
+    "ownerRating": 5,
+    "comment": "Bright rooms, quick to fix the geyser, would rent again."
+  }
+}
+
+docs {
+  # Create or Update Review
+
+  Signed-in user. Cannot review own listing.
+  Ratings 1–5. Comment min 8 characters.
+  Repeat POST replaces the previous review for that flat.
+}

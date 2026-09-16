@@ -1,0 +1,28 @@
+meta {
+  name: Destroy Images
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/uploads/destroy
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "publicIds": ["bari-vara/flats/example-public-id"]
+  }
+}
+
+docs {
+  # Destroy Images
+
+  Owner/admin. Best-effort Cloudinary cleanup (e.g. after a failed listing publish).
+  Only public ids under `bari-vara/flats/` are accepted.
+}

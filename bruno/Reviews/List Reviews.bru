@@ -1,0 +1,22 @@
+meta {
+  name: List Reviews
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}{{apiPrefix}}/flats/{{flatId}}/reviews?page=1&limit=10
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 1
+  limit: 10
+}
+
+docs {
+  # List Reviews
+
+  Public. Paginated. Updates flat + owner rating rollups when reviews change.
+}

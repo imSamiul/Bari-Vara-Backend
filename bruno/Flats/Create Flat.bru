@@ -1,0 +1,52 @@
+meta {
+  name: Create Flat
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/flats
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "title": "Bright two bedroom beside Dhanmondi lake",
+    "description": "A quiet corner flat with cross ventilation, a south facing balcony and a lift that actually works.",
+    "category": "family",
+    "monthlyRent": 32000,
+    "serviceCharge": 2000,
+    "bedrooms": 2,
+    "bathrooms": 2,
+    "balconies": 1,
+    "areaSqft": 1100,
+    "availableFrom": "2026-10-01",
+    "amenities": ["lift", "parking", "generator", "gas-line", "balcony"],
+    "address": {
+      "line1": "House 12, Road 4",
+      "area": "Dhanmondi",
+      "city": "Dhaka",
+      "division": "Dhaka",
+      "postcode": "1209"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200",
+        "publicId": "seed/demo-listing"
+      }
+    ]
+  }
+}
+
+docs {
+  # Create Flat
+
+  Owner/admin. If `coordinates` is omitted, the API uses the Dhaka area centre.
+
+  Prefer uploading via **Uploads → Upload Images** first, then paste `url` / `publicId` here.
+}

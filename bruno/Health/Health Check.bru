@@ -1,0 +1,27 @@
+meta {
+  name: Health Check
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/health
+  body: none
+  auth: none
+}
+
+docs {
+  # Health Check
+
+  Confirms the process is up. Does not prove Mongo/Redis are connected.
+
+  **Example response**
+
+  ```json
+  {
+    "success": true,
+    "message": "ok",
+    "data": { "uptime": 12.34 }
+  }
+  ```
+}

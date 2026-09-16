@@ -1,0 +1,27 @@
+meta {
+  name: Resend OTP
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/auth/resend-otp
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "{{registerEmail}}"
+  }
+}
+
+docs {
+  # Resend OTP
+
+  Issues a new OTP. Throttled per email (default 60s cooldown).
+}

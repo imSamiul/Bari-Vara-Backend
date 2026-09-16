@@ -1,0 +1,27 @@
+meta {
+  name: List Users
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}{{apiPrefix}}/users?page=1&limit=20&role=user
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 1
+  limit: 20
+  role: user
+  ~search: 
+  ~ownerRequestStatus: pending
+}
+
+docs {
+  # List Users (admin)
+
+  Query: `page`, `limit`, `search`, `role` (`user|owner|admin`), `ownerRequestStatus`.
+
+  Copy a user's `id` into the `userId` environment variable for the next requests.
+}

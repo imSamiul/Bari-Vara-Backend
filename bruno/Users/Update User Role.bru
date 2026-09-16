@@ -1,0 +1,28 @@
+meta {
+  name: Update User Role
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}{{apiPrefix}}/users/{{userId}}/role
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "role": "owner"
+  }
+}
+
+docs {
+  # Update User Role (admin)
+
+  Body: `{ "role": "user" | "owner" | "admin" }`.
+  Setting `owner` also marks `ownerRequestStatus` as approved and revokes sessions.
+}

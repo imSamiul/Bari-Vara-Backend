@@ -1,0 +1,42 @@
+meta {
+  name: Register
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/auth/register
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Nusrat Jahan",
+    "email": "{{registerEmail}}",
+    "password": "{{password}}"
+  }
+}
+
+docs {
+  # Register
+
+  Creates an unverified tenant account and emails a 6-digit OTP.
+  Returns **202**. Login is blocked until verify-otp succeeds.
+
+  In development without SMTP, the OTP is logged by the API.
+
+  **Example response (202)**
+
+  ```json
+  {
+    "success": true,
+    "message": "Account created. Check your email for the verification code.",
+    "data": { "email": "new.user@example.com" }
+  }
+  ```
+}

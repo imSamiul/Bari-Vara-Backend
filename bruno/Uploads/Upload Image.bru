@@ -1,0 +1,38 @@
+meta {
+  name: Upload Image
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/uploads/image
+  body: multipartForm
+  auth: none
+}
+
+body:multipart-form {
+  image: @file(/absolute/path/to/photo.jpg)
+}
+
+docs {
+  # Upload Image
+
+  Field name: `image` (single file).
+
+  In Bruno, use the file picker for the `image` field — replace the placeholder path.
+
+  **Example response**
+
+  ```json
+  {
+    "success": true,
+    "message": "…",
+    "data": {
+      "url": "https://res.cloudinary.com/…/image/upload/…",
+      "publicId": "bari-vara/…"
+    }
+  }
+  ```
+
+  Paste `url` / `publicId` into Create Flat `images`.
+}

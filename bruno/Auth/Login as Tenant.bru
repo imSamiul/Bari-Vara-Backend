@@ -1,0 +1,32 @@
+meta {
+  name: Login as Tenant
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}{{apiPrefix}}/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "{{tenantEmail}}",
+    "password": "{{password}}"
+  }
+}
+
+docs {
+  # Login as Tenant
+
+  Demo: `tenant@barivara.dev` / `Password123`.
+
+  Sets `bv_access` + `bv_refresh` cookies. Use this before booking/review calls.
+
+  Unverified accounts return `code: "EMAIL_NOT_VERIFIED"`.
+}
